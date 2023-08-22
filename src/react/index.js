@@ -1,4 +1,5 @@
 import { REACT_ELEMENT } from "../utils";
+import { Component } from "./Component";
 
 function createElement(type, properties = {}, children) {
   let ref = properties.ref || null;
@@ -25,10 +26,10 @@ function createElement(type, properties = {}, children) {
     ref,
     key,
     props,
-    prop: 123,
   };
 }
 
 export default {
   createElement,
+  Component,
 };
