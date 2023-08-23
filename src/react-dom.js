@@ -71,6 +71,7 @@ function setPropsForDOM(dom, VNodeProps = {}) {
   for (let key in VNodeProps) {
     if (key === "children") continue;
     if (/^on[A-Z].*/.test(key)) {
+      addEvent(dom, key.toLowerCase(), VNodeProps[key]) 
     } else if (key === "style") {
       Object.keys(VNodeProps[key]).forEach((styleName) => {
         dom.style[styleName] = VNodeProps[key][styleName];
