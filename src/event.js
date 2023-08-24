@@ -8,6 +8,7 @@ export function addEvent(dom, eventName, bindFunction) {
   if (document[eventName]) return;
   document[eventName] = dispatchEvent;
 }
+
 /**
  *
  * @param {Event} nativeEvent
@@ -30,6 +31,7 @@ function dispatchEvent(nativeEvent) {
     target = target.parentNode;
   }
 
+  // 批处理
   flushUpdaterQueue();
 }
 
@@ -41,6 +43,28 @@ function createSyntheticEvent(nativeEvent) {
         ? nativeEvent[key].bind(nativeEvent)
         : nativeEvent[key];
   }
+
+  let syntheticEvent = Object.assign(nativeEventKeyValues, {
+    nativeEvent,
+    isDefaultPrevented: false,
+    isPropagationStopped: false,
+    preventDefault: function () {
+      this.isDefaultPrevented = true;
+      if (this.nativeEvent.preventDefault) {
+        this.nativeEvent.preventDefault();
+      } else {
+        this.nativeEvent.returnValue = false;
+      }
+    },
+    stopPropagation: function () {
+      this.isPropagationStopped = true;
+      if (this.nativeEvent.stopPropagation) {
+        this.nativeEvent.stopPropagation();
+      } else {
+        this.nativeEvent.cancelBubble = true;
+      }
+    }
+  })
 
   return syntheticEvent;
 }
