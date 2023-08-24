@@ -23,6 +23,7 @@ function dispatchEvent(nativeEvent) {
   // 冒泡处理
   while (target) {
     syntheticEvent.currentTarget = target;
+    let eventName = `on${nativeEvent.type}`;
     let bindFunction = target.attach && target.attach[eventName];
     bindFunction && bindFunction(syntheticEvent);
     if (syntheticEvent.isPropagationStopped) {
@@ -63,8 +64,8 @@ function createSyntheticEvent(nativeEvent) {
       } else {
         this.nativeEvent.cancelBubble = true;
       }
-    }
-  })
+    },
+  });
 
   return syntheticEvent;
 }

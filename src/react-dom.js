@@ -1,4 +1,5 @@
-import { REACT_ELEMENT } from "./utils";
+import { REACT_ELEMENT, REACT_FORWARD_REF } from "./utils";
+import { addEvent } from "./event";
 
 function render(VNode, containerDOM) {
   mount(VNode, containerDOM);
@@ -11,7 +12,7 @@ function mount(VNode, containerDOM) {
 
 function createDOM(VNode) {
   if (!VNode) return;
-  const { type, props } = VNode;
+  const { type, props, ref } = VNode;
   let dom;
   if (
     typeof type === "function" &&
@@ -21,6 +22,8 @@ function createDOM(VNode) {
     return getDomByClassComponent(VNode);
   } else if (typeof type === "function" && VNode.$$typeof === REACT_ELEMENT) {
     return getDomByFunctionComponent(VNode);
+  } else if (type && type.$$typeof === REACT_FORWARD_REF) {
+    return getDomByRefForwardFunction(VNode);
   } else if (type && VNode.$$typeof === REACT_ELEMENT) {
     dom = document.createElement(type);
   }
@@ -35,6 +38,7 @@ function createDOM(VNode) {
   }
   setPropsForDOM(dom, props);
   VNode.dom = dom;
+  ref && (ref.current = dom);
   return dom;
 }
 
@@ -50,9 +54,17 @@ export function findDomByVNode(VNode) {
   if (VNode.dom) return VNode.dom;
 }
 
+function getDomByRefForwardFunction(vNode) {
+  let { type, props, ref } = vNode;
+  let renderVDom = type.render(props, ref);
+  if (!renderVDom) return null;
+  return createDOM(renderVDom);
+}
+
 function getDomByClassComponent(vNode) {
-  let { type, props } = vNode;
+  let { type, props, ref } = vNode;
   let instance = new type(props);
+  ref && (ref.current = instance);
   let renderVNode = instance.render();
   instance.oldVNode = renderVNode;
   if (!renderVNode) return null;
@@ -60,8 +72,8 @@ function getDomByClassComponent(vNode) {
 }
 
 function getDomByFunctionComponent(VNode) {
-  let { type, props } = VNode;
-  let renderVNode = type(props);
+  let { type, props, ref } = VNode;
+  let renderVNode = type(props, ref);
   if (!renderVNode) return null;
   return createDOM(renderVNode);
 }
