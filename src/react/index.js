@@ -17,7 +17,7 @@ function createElement(type, properties = {}, children) {
   if (arguments.length > 3) {
     props.children = Array.prototype.slice.call(arguments, 2).map(toVNode);
   } else {
-    props.children = children;
+    props.children = toVNode(children);
   }
 
   return {
